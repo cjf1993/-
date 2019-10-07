@@ -1,0 +1,83 @@
+在过去单CPU时代，单任务在一个时间点只能执行单一程序。
+之后发展到多任务阶段，计算机能在同一时间点并行执行多任务或多进程。
+虽然并不是真正意义上的“同一时间点”，而是多个任务或进程共享一个CPU，并交由操作系统来完成多任务间对CPU的运行切换，
+以使得每个任务都有机会获得一定的时间片运行。
+
+随着多任务对软件开发者带来的新挑战，程序不在能假设独占所有的CPU时间、所有的内存和其他计算机资源。
+一个好的程序榜样是在其不再使用这些资源时对其进行释放，以使得其他程序能有机会使用这些资源。
+再后来发展到多线程技术，使得在一个程序内部能拥有多个线程并行执行。
+一个线程的执行可以被认为是一个CPU在执行该程序。
+当一个程序运行在多线程下，就好像有多个CPU在同时执行该程序。
+多线程比多任务更加有挑战。多线程是在同一个程序内部并行执行，因此会对相同的内存空间进行并发读写操作。
+这可能是在单线程程序中从来不会遇到的问题。
+其中的一些错误也未必会在单CPU机器上出现，因为两个线程从来不会得到真正的并行执行。
+然而，更现代的计算机伴随着多核CPU的出现，也就意味着不同的线程能被不同的CPU核得到真正意义的并行执行。
+如果一个线程在读一个内存时，另一个线程正向该内存进行写操作，那进行读操作的那个线程将获得什么结果呢？
+是写操作之前旧的值？还是写操作成功之后的新值？或是一半新一半旧的值？
+或者，如果是两个线程同时写同一个内存，在操作完成后将会是什么结果呢？
+是第一个线程写入的值？还是第二个线程写入的值？还是两个线程写入的一个混合值？
+因此如没有合适的预防措施，任何结果都是可能的。而且这种行为的发生甚至不能预测，所以结果也是不确定性的。
+
+多线程优缺点：
+ 1.资源利用率更好；2.程序响应更快
+ 1.设计更复杂；
+ 2.上下文切换的开销--当CPU从执行一个线程切换到执行另外一个线程的时候，它需要先存储当前线程的本地的数据，程序指针等，
+  然后载入另一个线程的本地数据，程序指针等，最后才开始执行。
+ 3.增加资源消耗-堆栈
+ -------------------------------------------
+ 创建线程：
+ Java线程类也是一个object类,它的实例都继承自java.lang.Thread或其子类。 可以用如下方式用java中创建一个线程：
+              Tread thread = new Thread();
+执行该线程可以调用该线程的start()方法:  thread.start();
+
+编写线程运行时执行的代码有两种方式：一种是创建Thread子类的一个实例并重写run方法，第二种是创建类的时候实现Runnable接口
+
+创建Thread子类的一个实例并重写run方法，run方法会在调用start()方法之后被执行。例子如下：
+public class MyThread extends Thread {
+   public void run(){
+     System.out.println("MyThread running");
+   }
+}
+可以用如下方式创建并运行上述Thread子类
+MyThread myThread = new MyThread();
+myTread.start();
+一旦线程启动后start方法就会立即返回，而不会等待到run方法执行完毕才返回。就好像run方法是在另外一个cpu上执行一样。当run方法执行后，将会打印出字符串MyThread running。
+
+你也可以如下创建一个Thread的匿名子类：
+Thread thread = new Thread(){
+   public void run(){
+     System.out.println("Thread Running");
+   }
+};
+thread.start();
+当新的线程的run方法执行以后，计算机将会打印出字符串”Thread Running”。
+----------------------------------------------------------------------
+   第二种编写线程执行代码的方式是新建一个实现了java.lang.Runnable接口的类的实例，实例中的方法可以被线程调用。下面给出例子：
+
+1
+public class MyRunnable implements Runnable {
+2
+   public void run(){
+3
+    System.out.println("MyRunnable running");
+4
+   }
+5
+}
+为了使线程能够执行run()方法，需要在Thread类的构造函数中传入 MyRunnable的实例对象。示例如下：
+
+1
+Thread thread = new Thread(new MyRunnable());
+2
+thread.start();
+当线程运行时，它将会调用实现了Runnable接口的run方法。上例中将会打印出”MyRunnable running”。
+
+同样，也可以创建一个实现了Runnable接口的匿名类，如下所示：
+Runnable myRunnable = new Runnable(){
+   public void run(){
+     System.out.println("Runnable running");
+   }
+
+}
+Thread thread = new Thread(myRunnable);
+thread.start();
